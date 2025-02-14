@@ -21,7 +21,7 @@ connectDB();
 
 // ✅ CORS configuration (Allow frontend to communicate with backend dynamically)
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3001', 
+  origin: process.env.FRONTEND_URL || 'http://localhost:3001'||'https://soundsphere-mocha.vercel.app', 
   methods: ['GET', 'POST'],
   credentials: true,
   optionsSuccessStatus: 200
