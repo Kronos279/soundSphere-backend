@@ -75,7 +75,10 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((obj, done) => done(null, obj));
+passport.deserializeUser((obj, done) =>{
+    console.log("🔍 Deserializing User:", obj);
+    done(null, obj)
+});
 
 // ✅ Use separate route files
 app.use('/api/tracks', trackRoutes);

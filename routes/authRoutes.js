@@ -33,6 +33,8 @@ router.get('/auth/spotify/callback',
 
 // Auth status check route
 router.get('/auth/status', (req, res) => {
+  console.log("🔍 Session Data:", req.session); // 🔍 Debug session
+  console.log("🔍 User Data:", req.user); // 🔍 Check user authentication
   console.log('Is Authenticated:', req.isAuthenticated());
 
   if (req.isAuthenticated() && req.user) {
