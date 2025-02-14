@@ -2,24 +2,26 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const MongoStore = require('connect-mongo'); // ✅ Use MongoDB for session storage
 const passport = require('passport');
 const SpotifyStrategy = require('passport-spotify').Strategy;
 require('dotenv').config();
 const trackRoutes = require('./routes/trackroutes');
 const authRoutes = require('./routes/authRoutes');
 const playlistRoutes = require('./routes/playlistRoutes');
-const connectDB = require('./config/db'); // Import the db.js file
+const connectDB = require('./config/db'); // Import MongoDB connection function
 
 const app = express();
-const apiUrl = `${process.env.BASE_URL}`;
 
+// ✅ Set API base URL dynamically
+const apiUrl = process.env.BASE_URL || 'http://localhost:3000';
 
-// Connect to MongoDB
+// ✅ Connect to MongoDB
 connectDB();
 
-// CORS configuration
+// ✅ CORS configuration (Allow frontend to communicate with backend dynamically)
 app.use(cors({
-  origin: 'http://localhost:3001', // Your frontend URL
+  origin: process.env.FRONTEND_URL || 'http://localhost:3001', 
   methods: ['GET', 'POST'],
   credentials: true,
   optionsSuccessStatus: 200
@@ -30,40 +32,45 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Proper session configuration
+// ✅ Use MongoDB for session storage in production
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'session_secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
+  secret: process.env.SESSION_SECRET || 'session_secret',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI, // Use the correct MongoDB Atlas URI
+    collectionName: 'sessions',
+    ttl: 14 * 24 * 60 * 60, // 14 days
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Secure cookie in production
+    sameSite: 'lax',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
 // ✅ Initialize Passport for authentication
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ✅ Configure Spotify authentication
+// ✅ Configure Spotify authentication (Ensure these env variables exist)
+if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
+  console.error("❌ Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET. Add them in Vercel environment variables.");
+  process.exit(1);
+}
+
 passport.use(
-    new SpotifyStrategy(
-        {
-            clientID: process.env.SPOTIFY_CLIENT_ID,
-            clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-            callbackURL: process.env.SPOTIFY_CALLBACK_URL,
-        },
-        (accessToken, refreshToken, expires_in, profile, done) => {
-            const user = {
-                accessToken,
-                refreshToken,
-                profile
-            };
-            return done(null, user);
-        }
-    )
+  new SpotifyStrategy(
+    {
+      clientID: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+      callbackURL: process.env.SPOTIFY_CALLBACK_URL,
+    },
+    (accessToken, refreshToken, expires_in, profile, done) => {
+      return done(null, { accessToken, refreshToken, profile });
+    }
+  )
 );
 
 passport.serializeUser((user, done) => done(null, user));
@@ -76,23 +83,22 @@ app.use(playlistRoutes);
 
 // ✅ Logout route
 app.get('/logout', (req, res) => {
-    req.logout(err => {
-        if (err) return res.status(500).send("Logout failed.");
-        req.session.destroy(() => {
-            res.clearCookie('connect.sid');  // Clear session cookie
-            res.status(200).send("Logged out successfully!");
-        });
+  req.logout(err => {
+    if (err) return res.status(500).send("Logout failed.");
+    req.session.destroy(() => {
+      res.clearCookie('connect.sid');  // Clear session cookie
+      res.status(200).send("Logged out successfully!");
     });
+  });
 });
 
 // ✅ Test endpoint
 app.get('/', (req, res) => {
-    res.send('Welcome to the Spotify-like Backend! 🎧');
+  res.send('Welcome to the Spotify-like Backend! 🎧');
 });
 
 // ✅ Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`✅ Server running on ${process.env.BASE_URL || `http://localhost:${PORT}`}`);
-
+  console.log(`✅ Server running on ${apiUrl}`);
 });
