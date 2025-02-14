@@ -34,22 +34,22 @@ app.use(express.urlencoded({ extended: true }));
 
 // ✅ Use MongoDB for session storage in production
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'session_secret',
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI, // Use the correct MongoDB Atlas URI
-    collectionName: 'sessions',
-    ttl: 14 * 24 * 60 * 60, // 14 days
-  }),
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // Secure cookie in production
-    sameSite: 'lax',
-    secure: true,
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
+    secret: process.env.SESSION_SECRET || "session_secret",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: "sessions",
+      ttl: 14 * 24 * 60 * 60, // 14 days
+    }),
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // ✅ Secure in production
+      httpOnly: true,
+      sameSite:'none', // ✅ Required for cross-origin requests
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    }
+  }));
+  
 
 // ✅ Initialize Passport for authentication
 app.use(passport.initialize());
