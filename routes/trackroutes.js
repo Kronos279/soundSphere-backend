@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const trackController = require('../controllers/trackcontroller');
+const trackController = require('../controllers/trackController');
 
 // Existing routes
 router.post('/download', trackController.downloadTrack);

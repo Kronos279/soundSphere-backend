@@ -11,6 +11,8 @@ const playlistRoutes = require('./routes/playlistRoutes');
 const connectDB = require('./config/db'); // Import the db.js file
 
 const app = express();
+const apiUrl = `${process.env.BASE_URL}`;
+
 
 // Connect to MongoDB
 connectDB();
@@ -30,7 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ✅ Proper session configuration
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'your_session_secret',
+    secret: process.env.SESSION_SECRET || 'session_secret',
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -72,15 +74,6 @@ app.use('/api/tracks', trackRoutes);
 app.use(authRoutes);
 app.use(playlistRoutes);
 
-// ✅ Check if user is authenticated
-// app.get('/auth/status', (req, res) => {
-//     if (req.isAuthenticated()) {
-//         res.json({ isAuthenticated: true });
-//     } else {
-//         res.json({ isAuthenticated: false });
-//     }
-// });
-
 // ✅ Logout route
 app.get('/logout', (req, res) => {
     req.logout(err => {
@@ -100,5 +93,6 @@ app.get('/', (req, res) => {
 // ✅ Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`✅ Server running on ${process.env.BASE_URL || `http://localhost:${PORT}`}`);
+
 });
