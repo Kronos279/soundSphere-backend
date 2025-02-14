@@ -62,23 +62,30 @@ if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
 }
 
 passport.use(
-  new SpotifyStrategy(
-    {
-      clientID: process.env.SPOTIFY_CLIENT_ID,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: process.env.SPOTIFY_CALLBACK_URL,
-    },
-    (accessToken, refreshToken, expires_in, profile, done) => {
-      return done(null, { accessToken, refreshToken, profile });
-    }
-  )
-);
+    new SpotifyStrategy(
+      {
+        clientID: process.env.SPOTIFY_CLIENT_ID,
+        clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+        callbackURL: process.env.SPOTIFY_CALLBACK_URL,
+      },
+      (accessToken, refreshToken, expires_in, profile, done) => {
+        console.log("🔍 Storing User in Session:", profile);
+        return done(null, { accessToken, refreshToken, profile });
+      }
+    )
+  );
+  
 
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((obj, done) =>{
+passport.serializeUser((user, done) => {
+    console.log("🔍 Serializing User:", user);
+    done(null, user);
+  });
+  
+  passport.deserializeUser((obj, done) => {
     console.log("🔍 Deserializing User:", obj);
-    done(null, obj)
-});
+    done(null, obj);
+  });
+  
 
 // ✅ Use separate route files
 app.use('/api/tracks', trackRoutes);
