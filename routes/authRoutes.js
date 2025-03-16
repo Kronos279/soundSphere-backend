@@ -13,7 +13,7 @@ router.get('/auth/spotify',
 
 // Callback route after Spotify authentication
 router.get('/auth/spotify/callback',
-  passport.authenticate('spotify', { failureRedirect: 'http://localhost:3001/login' }),
+  passport.authenticate('spotify', { failureRedirect: 'sound-sphere-six.vercel.app/login' }),
   (req, res) => {
     try {
       req.session.user = {
@@ -24,9 +24,9 @@ router.get('/auth/spotify/callback',
         accessToken: req.user.accessToken,
         refreshToken: req.user.refreshToken
       };
-      res.redirect('http://localhost:3001');
+      res.redirect('sound-sphere-six.vercel.app');
     } catch (error) {
-      res.redirect('http://localhost:3001/login');
+      res.redirect('sound-sphere-six.vercel.app/login');
     }
   }
 );
