@@ -3,6 +3,9 @@ const passport = require('passport');
 
 const router = express.Router();
 
+// Read the frontend URL from the environment
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3001';
+
 // Spotify authentication route
 router.get('/auth/spotify',
   passport.authenticate('spotify', {
@@ -13,7 +16,7 @@ router.get('/auth/spotify',
 
 // Callback route after Spotify authentication
 router.get('/auth/spotify/callback',
-  passport.authenticate('spotify', { failureRedirect: 'sound-sphere-six.vercel.app/login' }),
+  passport.authenticate('spotify', { failureRedirect: `${FRONTEND_URL}/login` }),
   (req, res) => {
     try {
       req.session.user = {
@@ -24,9 +27,9 @@ router.get('/auth/spotify/callback',
         accessToken: req.user.accessToken,
         refreshToken: req.user.refreshToken
       };
-      res.redirect('sound-sphere-six.vercel.app');
+      res.redirect(FRONTEND_URL);
     } catch (error) {
-      res.redirect('sound-sphere-six.vercel.app/login');
+      res.redirect(`${FRONTEND_URL}/login`);
     }
   }
 );
