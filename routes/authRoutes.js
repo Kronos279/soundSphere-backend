@@ -3,6 +3,9 @@ const passport = require('passport');
 
 const router = express.Router();
 
+// Get the FRONTEND_URL from environment variables (default to localhost:3001 if not defined)
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3001';
+
 // Spotify authentication route
 router.get('/auth/spotify',
   passport.authenticate('spotify', {
@@ -13,7 +16,7 @@ router.get('/auth/spotify',
 
 // Callback route after Spotify authentication
 router.get('/auth/spotify/callback',
-  passport.authenticate('spotify', { failureRedirect: 'http://localhost:3001/login' }),
+  passport.authenticate('spotify', { failureRedirect: `${FRONTEND_URL}/login` }),
   (req, res) => {
     try {
       req.session.user = {
@@ -24,17 +27,15 @@ router.get('/auth/spotify/callback',
         accessToken: req.user.accessToken,
         refreshToken: req.user.refreshToken
       };
-      res.redirect('http://localhost:3001');
+      res.redirect(FRONTEND_URL);
     } catch (error) {
-      res.redirect('http://localhost:3001/login');
+      res.redirect(`${FRONTEND_URL}/login`);
     }
   }
 );
 
 // Auth status check route
 router.get('/auth/status', (req, res) => {
-  console.log("🔍 Session Data:", req.session); // 🔍 Debug session
-  console.log("🔍 User Data:", req.user); // 🔍 Check user authentication
   console.log('Is Authenticated:', req.isAuthenticated());
 
   if (req.isAuthenticated() && req.user) {
