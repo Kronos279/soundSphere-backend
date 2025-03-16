@@ -24,7 +24,7 @@ connectDB();
 // ✅ CORS Configuration
 app.use(
   cors({
-    origin: ["http://localhost:3001", "https://soundsphere-mocha.vercel.app","http://sound-sphere-six.vercel.app"],
+    origin: ["http://sound-sphere-six.vercel.app", "https://soundsphere-mocha.vercel.app","http://localhost:3001"],
     methods: ["GET", "POST"],
     credentials: true, // ✅ Required to allow cookies
     optionsSuccessStatus: 200,
