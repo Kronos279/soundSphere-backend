@@ -11,32 +11,32 @@ const authRoutes = require("./routes/authRoutes");
 const playlistRoutes = require("./routes/playlistRoutes");
 const connectDB = require("./config/db");
 
-// ✅ Initialize Express App
+//  Initialize Express App
 const app = express();
-app.set("trust proxy", 1); // ✅ Required for Vercel to trust cookies
+app.set("trust proxy", 1); //  Required for Vercel to trust cookies
 
-// ✅ Set API base URL dynamically
+//Set API base URL dynamically
 const apiUrl = process.env.BASE_URL || "http://localhost:3000";
 
-// ✅ Connect to MongoDB
+// Connect to MongoDB
 connectDB();
 
-// ✅ CORS Configuration
+//CORS Configuration
 app.use(
   cors({
     origin: ["https://sound-sphere-six.vercel.app", "https://soundsphere-mocha.vercel.app","http://localhost:3001"],
     methods: ["GET", "POST"],
-    credentials: true, // ✅ Required to allow cookies
+    credentials: true, //  Required to allow cookies
     optionsSuccessStatus: 200,
   })
 );
 
-// ✅ Ensure JSON and URL-encoded requests are handled properly
+// Ensure JSON and URL-encoded requests are handled properly
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Session Configuration (Use MongoDB as Session Store)
+// Session Configuration (Use MongoDB as Session Store)
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "session_secret",
@@ -48,22 +48,22 @@ app.use(
       ttl: 14 * 24 * 60 * 60, // 14 days
     }),
     cookie: {
-      secure: true, // ✅ Required for HTTPS in production
+      secure: true, // Required for HTTPS in production
       httpOnly: true,
-      sameSite: "none", // ✅ Required for cross-origin requests
+      sameSite: "none", //Required for cross-origin requests
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   })
 );
 
-// ✅ Initialize Passport for Authentication
+// Initialize Passport for Authentication
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ✅ Configure Spotify Authentication
+// Configure Spotify Authentication
 if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
   console.error(
-    "❌ Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET. Add them in Vercel environment variables."
+    "Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET. Add them in Vercel environment variables."
   );
   process.exit(1);
 }
@@ -82,7 +82,7 @@ passport.use(
   )
 );
 
-// ✅ Passport Serialization & Deserialization
+//Passport Serialization & Deserialization
 passport.serializeUser((user, done) => {
   console.log("🔍 Serializing User:", user);
   done(null, user);
@@ -93,12 +93,12 @@ passport.deserializeUser((obj, done) => {
   done(null, obj);
 });
 
-// ✅ Route Files
+// Route Files
 app.use("/api/tracks", trackRoutes);
 app.use(authRoutes);
 app.use(playlistRoutes);
 
-// ✅ Logout Route
+//Logout Route
 app.get("/logout", (req, res) => {
   req.logout((err) => {
     if (err) return res.status(500).send("Logout failed.");
@@ -109,7 +109,7 @@ app.get("/logout", (req, res) => {
   });
 });
 
-// ✅ Debugging Route to Check Authentication Status
+//Debugging Route to Check Authentication Status
 app.get("/auth/status", (req, res) => {
   console.log("🔍 Session Data:", req.session);
   console.log("🔍 User Data:", req.user);
@@ -122,13 +122,13 @@ app.get("/auth/status", (req, res) => {
   res.json({ isAuthenticated: false });
 });
 
-// ✅ Test Endpoint
+//Test Endpoint
 app.get("/", (req, res) => {
   res.send("Welcome to the Spotify-like Backend! 🎧");
 });
 
-// ✅ Start Server
+//  Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on ${apiUrl}`);
+  console.log(` Server running on ${apiUrl}`);
 });
